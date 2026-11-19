@@ -21,11 +21,11 @@ export function isStandalone(): boolean {
     (navigator as unknown as { standalone?: boolean }).standalone === true;
 }
 
-function urlB64ToUint8Array(base64: string): Uint8Array {
+function urlB64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
   const padding = "=".repeat((4 - (base64.length % 4)) % 4);
   const b64 = (base64 + padding).replace(/-/g, "+").replace(/_/g, "/");
   const raw = atob(b64);
-  const arr = new Uint8Array(raw.length);
+  const arr = new Uint8Array(new ArrayBuffer(raw.length));
   for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
   return arr;
 }
@@ -53,7 +53,7 @@ export async function enablePush(): Promise<void> {
   if (!sub) {
     sub = await reg.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlB64ToUint8Array(key) as BufferSource,
+      applicationServerKey: urlB64ToUint8Array(key),
     });
   }
   await api("/api/push/subscribe", { subscription: sub.toJSON(), userAgent: navigator.userAgent });

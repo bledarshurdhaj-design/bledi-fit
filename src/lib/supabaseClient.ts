@@ -20,10 +20,10 @@ export function sb(): SupabaseClient {
 }
 
 /** Hedh gabim në shqip nëse kërkesa dështon. */
-export function check<T>(res: { data: T; error: { message: string } | null }): T {
+export function check<T>(res: { data: T | null; error: { message: string } | null }): T {
   if (res.error) {
     if (typeof navigator !== "undefined" && !navigator.onLine) throw new Error("Je offline. Lidhu me internet dhe provo përsëri.");
     throw new Error(res.error.message);
   }
-  return res.data;
+  return res.data as T;
 }
