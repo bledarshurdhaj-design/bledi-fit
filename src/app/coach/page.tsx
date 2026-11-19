@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useApp } from "@/components/Providers";
 import { ErrorBox, Loading, PageHeader, Toast, useToast } from "@/components/ui";
-import { sb, check } from "@/lib/supabaseClient";
+import { sb, check } from "@/lib/dbClient";
 import { api } from "@/lib/api";
 import { daysBetween, formatDateTime, todayStr } from "@/lib/dates";
 import { FIELD_LABELS, type PlanProposal } from "@/lib/types";

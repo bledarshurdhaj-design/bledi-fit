@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useApp } from "@/components/Providers";
 import { Check, ErrorBox, PageHeader } from "@/components/ui";
-import { sb } from "@/lib/supabaseClient";
+import { sb } from "@/lib/dbClient";
 import { api } from "@/lib/api";
 import { todayStr } from "@/lib/dates";
 import { MOTIVATION } from "@/lib/messages";

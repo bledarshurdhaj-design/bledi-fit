@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useApp } from "@/components/Providers";
 import { Check, ErrorBox, Loading, PageHeader, ProgressBar, Toast, useToast } from "@/components/ui";
-import { sb, check } from "@/lib/supabaseClient";
+import { sb, check } from "@/lib/dbClient";
 import { addDays, isoWeekday, todayStr, weekdayName } from "@/lib/dates";
 import { PROGRAM, workoutByKey, workoutForWeekday, type DayKey } from "@/lib/program";
 import type { CardioSession, WorkoutSession } from "@/lib/types";

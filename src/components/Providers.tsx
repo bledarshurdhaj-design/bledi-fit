@@ -1,9 +1,12 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import type { User } from "@supabase/supabase-js";
-import { sb, supabaseConfigured } from "@/lib/supabaseClient";
 import type { Profile } from "@/lib/types";
+
+export interface User {
+  id: string;
+  email: string;
+}
 
 interface AppCtx {
   user: User;
@@ -36,6 +39,11 @@ export function useOnline(): boolean {
   return online;
 }
 
+export async function logout() {
+  await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" }).catch(() => {});
+  location.href = "/login";
+}
+
 const PUBLIC = ["/login"];
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -47,69 +55,48 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Service Worker (offline + push)
   useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
-    }
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
   }, []);
 
-  const loadProfile = useCallback(async (uid: string) => {
-    const { data, error } = await sb().from("profiles").select("*").eq("user_id", uid).maybeSingle();
-    if (error) throw error;
-    if (data) {
-      setProfile(data as Profile);
-      return;
-    }
-    // Profili krijohet nga trigger-i; rezervë nëse trigger-i nuk ekzistonte
-    const ins = await sb().from("profiles").insert({ user_id: uid }).select("*").single();
-    if (ins.error) throw ins.error;
-    setProfile(ins.data as Profile);
-  }, []);
-
-  useEffect(() => {
-    if (!supabaseConfigured()) {
-      setError("Supabase nuk është konfiguruar. Vendos NEXT_PUBLIC_SUPABASE_URL dhe NEXT_PUBLIC_SUPABASE_ANON_KEY (shih README).");
-      setReady(true);
-      return;
-    }
-    let active = true;
-    sb().auth.getSession().then(async ({ data }) => {
-      if (!active) return;
-      const u = data.session?.user ?? null;
-      setUser(u);
-      if (u) {
-        try { await loadProfile(u.id); } catch (e) { setError((e as Error).message); }
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/me", { credentials: "same-origin", cache: "no-store" });
+      if (res.status === 401) {
+        setUser(null);
+        setProfile(null);
+      } else if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || `Gabim në server (${res.status}).`);
+      } else {
+        const j = (await res.json()) as { user: User; profile: Profile };
+        setUser(j.user);
+        setProfile(j.profile);
       }
+      setError(null);
+    } catch (e) {
+      setError(!navigator.onLine ? "Je offline. Lidhu me internet për të hapur aplikacionin." : (e as Error).message);
+    } finally {
       setReady(true);
-    });
-    const { data: sub } = sb().auth.onAuthStateChange((_e, session) => {
-      const u = session?.user ?? null;
-      setUser(u);
-      // setTimeout: shmang bllokimin e njohur kur thirret Supabase brenda këtij callback-u
-      if (u) setTimeout(() => loadProfile(u.id).catch((e) => setError((e as Error).message)), 0);
-      else setProfile(null);
-    });
-    return () => {
-      active = false;
-      sub.subscription.unsubscribe();
-    };
-  }, [loadProfile]);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   const isPublic = PUBLIC.includes(path);
 
   useEffect(() => {
-    if (ready && !user && !isPublic && !error) router.replace("/login");
+    if (ready && !error && !user && !isPublic) router.replace("/login");
     if (ready && user && path === "/login") router.replace("/");
   }, [ready, user, isPublic, path, router, error]);
 
   const bar = !online ? <div className="offline-bar">Je offline – të dhënat e reja nuk mund të ruhen tani.</div> : null;
 
-  if (error) {
+  if (error && !isPublic) {
     return (
       <div className="page">
         <div className="notice warn">{error}</div>
-        <button className="btn block" onClick={() => location.reload()}>Provo përsëri</button>
+        <button className="btn block" onClick={() => { setReady(false); load(); }}>Provo përsëri</button>
       </div>
     );
   }
@@ -126,7 +113,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <Ctx.Provider value={{ user, profile, reloadProfile: () => loadProfile(user.id), online }}>
+    <Ctx.Provider value={{ user, profile, reloadProfile: load, online }}>
       {bar}
       {children}
     </Ctx.Provider>

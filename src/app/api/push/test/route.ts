@@ -11,7 +11,7 @@ export const POST = handle(async (req) => {
   const { data: subs } = await db.from("push_subscriptions").select("id, endpoint, p256dh, auth").eq("user_id", user.id);
   if (!subs?.length) throw new HttpError(404, "Kjo pajisje nuk është e abonuar. Aktivizo njoftimet fillimisht.");
   const r = body.slot && Object.prototype.hasOwnProperty.call(REMINDERS, body.slot) ? REMINDERS[body.slot] : null;
-  const result = await sendToSubscriptions(db, subs as SubRow[], {
+  const result = await sendToSubscriptions(subs as SubRow[], {
     title: r ? r.title : "BLEDI FIT – Provë",
     body: r ? r.body : "Njoftimet funksionojnë! 💪 Qëllimi yt: 90 kg.",
     url: "/",

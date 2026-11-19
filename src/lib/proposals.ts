@@ -1,4 +1,3 @@
-import "server-only";
 import type { Profile } from "./types";
 
 type Field = "calorie_target" | "protein_min" | "protein_max" | "cardio_minutes";

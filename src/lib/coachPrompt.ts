@@ -1,4 +1,3 @@
-import "server-only";
 import type { AITool } from "./ai";
 
 export const COACH_SYSTEM = `Ti je BLEDI AI COACH – trajner personal fitnesi, asistent ushqimi dhe trajner i disiplinës brenda aplikacionit BLEDI FIT.

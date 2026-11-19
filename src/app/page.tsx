@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useApp } from "@/components/Providers";
 import { Check, ErrorBox, ProgressBar } from "@/components/ui";
-import { sb, check } from "@/lib/supabaseClient";
+import { sb, check } from "@/lib/dbClient";
 import { isoWeekday, todayStr } from "@/lib/dates";
 import { workoutForWeekday } from "@/lib/program";
 import { activeInAppSlot, REMINDERS } from "@/lib/messages";

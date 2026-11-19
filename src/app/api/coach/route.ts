@@ -4,7 +4,7 @@ import { COACH_SYSTEM, MODE_INSTRUCTIONS, PROPOSE_TOOL } from "@/lib/coachPrompt
 import { isField, validateChange } from "@/lib/proposals";
 import { handle, HttpError, intIn, json, readJson, requireUser, str } from "@/lib/server";
 import { addDays } from "@/lib/dates";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Db } from "@/lib/qb";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -20,7 +20,7 @@ interface Body {
   energy?: number;
 }
 
-async function enforceDailyLimit(db: SupabaseClient, userId: string) {
+async function enforceDailyLimit(db: Db, userId: string) {
   const limit = Number(process.env.AI_DAILY_LIMIT || 60);
   const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
   const { count } = await db

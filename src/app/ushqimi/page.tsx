@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useApp } from "@/components/Providers";
 import { ErrorBox, Loading, PageHeader, ProgressBar, Toast, useToast } from "@/components/ui";
-import { sb, check } from "@/lib/supabaseClient";
+import { sb, check } from "@/lib/dbClient";
 import { api } from "@/lib/api";
 import { todayStr } from "@/lib/dates";
 import { round1 } from "@/lib/stats";

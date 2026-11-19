@@ -1,15 +1,14 @@
-import "server-only";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Db } from "./qb";
 import { addDays, dateStr, hourIn, isoWeekday, todayStr, weekdayName } from "./dates";
 import { PROGRAM, workoutForWeekday } from "./program";
 import {
   latestWeight, nutritionByDay, nutritionSummary, round1, suggestCalorieAdjustment, weightTrend,
 } from "./stats";
 import type { Profile } from "./types";
-import { HttpError } from "./server";
+import { HttpError } from "./errors";
 
 /** Ngarkon të dhënat REALE të përdoruesit dhe i përmbledh për AI Coach. */
-export async function buildCoachContext(db: SupabaseClient, userId: string) {
+export async function buildCoachContext(db: Db, userId: string) {
   const { data: profile, error: pErr } = await db.from("profiles").select("*").eq("user_id", userId).single();
   if (pErr || !profile) throw new HttpError(404, "Profili nuk u gjet.");
   const p = profile as Profile;

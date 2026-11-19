@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useApp } from "@/components/Providers";
 import { ErrorBox, Loading, PageHeader, ProgressBar, Toast, useToast } from "@/components/ui";
 import LineChart from "@/components/LineChart";
-import { sb, check } from "@/lib/supabaseClient";
+import { sb, check } from "@/lib/dbClient";
 import { api } from "@/lib/api";
 import { addDays, dateStr, formatDay, isoWeekday, mondayOf, todayStr } from "@/lib/dates";
 import { workoutForWeekday } from "@/lib/program";

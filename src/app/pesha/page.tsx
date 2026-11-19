@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useApp } from "@/components/Providers";
 import { ErrorBox, Loading, PageHeader, Toast, useToast } from "@/components/ui";
 import LineChart from "@/components/LineChart";
-import { sb, check } from "@/lib/supabaseClient";
+import { sb, check } from "@/lib/dbClient";
 import { dateStr, formatDateTime, todayStr } from "@/lib/dates";
 import { round1, weightTrend } from "@/lib/stats";
 import type { WeightEntry } from "@/lib/types";

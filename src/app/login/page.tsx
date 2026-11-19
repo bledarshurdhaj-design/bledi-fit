@@ -1,14 +1,5 @@
 "use client";
-import { useState } from "react";
-import { sb } from "@/lib/supabaseClient";
-
-function translate(msg: string): string {
-  if (/Invalid login credentials/i.test(msg)) return "Email ose fjalëkalim i gabuar.";
-  if (/Email not confirmed/i.test(msg)) return "Konfirmo email-in (kontrollo inbox-in) dhe provo përsëri.";
-  if (/already registered/i.test(msg)) return "Ky email është i regjistruar. Hyr me fjalëkalimin.";
-  if (/Password should be/i.test(msg)) return "Fjalëkalimi duhet të ketë të paktën 8 karaktere.";
-  return msg;
-}
+import { useEffect, useState } from "react";
 
 export default function LoginPage() {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -16,31 +7,37 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
+
+  // Nëse nuk ka asnjë llogari ende, hap direkt "Krijo llogari"
+  useEffect(() => {
+    fetch("/api/auth/me", { credentials: "same-origin" })
+      .then((r) => r.json())
+      .then((j) => {
+        if (j?.user) location.href = "/";
+        else if (j?.firstUser) setMode("signup");
+      })
+      .catch(() => {});
+  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    setInfo(null);
     if (!/^\S+@\S+\.\S+$/.test(email)) return setError("Shkruaj një email të vlefshëm.");
     if (password.length < 8) return setError("Fjalëkalimi duhet të ketë të paktën 8 karaktere.");
+    if (!navigator.onLine) return setError("Je offline. Lidhu me internet.");
     setBusy(true);
     try {
-      if (mode === "login") {
-        const { error } = await sb().auth.signInWithPassword({ email: email.trim(), password });
-        if (error) throw error;
-      } else {
-        const { data, error } = await sb().auth.signUp({
-          email: email.trim(),
-          password,
-          options: { emailRedirectTo: window.location.origin },
-        });
-        if (error) throw error;
-        if (!data.session) setInfo("Llogaria u krijua. Hap email-in dhe kliko lidhjen e konfirmimit, pastaj hyr.");
-      }
+      const res = await fetch(mode === "login" ? "/api/auth/login" : "/api/auth/register", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(j.error || `Gabim (${res.status}).`);
+      location.href = "/";
     } catch (err) {
-      setError(translate((err as Error).message));
-    } finally {
+      setError((err as Error).message);
       setBusy(false);
     }
   }
@@ -53,7 +50,7 @@ export default function LoginPage() {
         <p className="muted">Humb dhjamin. Ruaj muskujt. Vazhdo TANI.</p>
       </div>
       <form className="card" onSubmit={submit}>
-        <h2>{mode === "login" ? "Hyr" : "Krijo llogari"}</h2>
+        <h2>{mode === "login" ? "Hyr" : "Krijo llogarinë"}</h2>
         <label className="lbl" htmlFor="email">Email</label>
         <input id="email" className="input" type="email" autoComplete="email" inputMode="email"
           value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -61,7 +58,6 @@ export default function LoginPage() {
         <input id="pw" className="input" type="password" autoComplete={mode === "login" ? "current-password" : "new-password"}
           value={password} onChange={(e) => setPassword(e.target.value)} />
         {error && <div className="notice warn mt">{error}</div>}
-        {info && <div className="notice ok mt">{info}</div>}
         <button className="btn block mt" disabled={busy}>
           {busy ? <span className="spinner" /> : mode === "login" ? "HYR" : "KRIJO LLOGARINË"}
         </button>

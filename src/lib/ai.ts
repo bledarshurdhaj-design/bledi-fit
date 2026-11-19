@@ -1,5 +1,4 @@
-import "server-only";
-import { HttpError } from "./server";
+import { HttpError } from "./errors";
 
 export type AIContent =
   | { type: "text"; text: string }

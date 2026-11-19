@@ -1,7 +1,6 @@
-import "server-only";
 import webpush from "web-push";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import { HttpError } from "./server";
+import { sql } from "./db";
+import { HttpError } from "./errors";
 
 let configured = false;
 
@@ -37,7 +36,7 @@ export interface PushPayload {
 }
 
 /** Dërgon njoftimin; abonimet e skaduara (404/410) fshihen. Kthen numrin e dërgimeve të suksesshme. */
-export async function sendToSubscriptions(db: SupabaseClient, subs: SubRow[], payload: PushPayload) {
+export async function sendToSubscriptions(subs: SubRow[], payload: PushPayload) {
   setup();
   let sent = 0;
   const errors: string[] = [];
@@ -53,7 +52,7 @@ export async function sendToSubscriptions(db: SupabaseClient, subs: SubRow[], pa
       } catch (e) {
         const code = (e as { statusCode?: number }).statusCode;
         if (code === 404 || code === 410) {
-          await db.from("push_subscriptions").delete().eq("id", s.id);
+          await sql("delete from push_subscriptions where id = $1", [s.id]);
         } else {
           errors.push(`${code ?? "?"}: ${(e as Error).message}`);
         }

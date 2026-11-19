@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useApp } from "@/components/Providers";
+import { logout, useApp } from "@/components/Providers";
 import { Check, ErrorBox, PageHeader, Toast, useToast } from "@/components/ui";
-import { sb, check } from "@/lib/supabaseClient";
+import { sb, check } from "@/lib/dbClient";
 import { api } from "@/lib/api";
 import { disablePush, enablePush, getPushState, isIOS, type PushState } from "@/lib/push";
 import { REMINDERS, type Slot } from "@/lib/messages";
@@ -177,7 +177,7 @@ export default function SettingsPage() {
         <h2>🔒 Të dhënat e mia</h2>
         <p className="small muted">{user.email}</p>
         <button className="btn secondary block" onClick={exportData} disabled={busy}>⬇️ Eksporto të gjitha të dhënat (JSON)</button>
-        <button className="btn danger block mt" onClick={() => sb().auth.signOut()}>Dil nga llogaria</button>
+        <button className="btn danger block mt" onClick={logout}>Dil nga llogaria</button>
       </div>
       <Toast msg={toast} />
     </div>
