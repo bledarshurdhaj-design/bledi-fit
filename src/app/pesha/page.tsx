@@ -21,7 +21,7 @@ export default function WeightPage() {
     setError(null);
     try {
       const data = check(await sb().from("weights").select("id, kg, measured_at, note").order("measured_at", { ascending: false }).limit(500));
-      const list = data.map((d) => ({ ...d, kg: Number(d.kg) })) as WeightEntry[];
+      const list = (data as WeightEntry[]).map((d) => ({ ...d, kg: Number(d.kg) }));
       setEntries(list);
       setValue((v) => v || (list[0] ? list[0].kg.toFixed(1) : Number(profile.start_weight).toFixed(1)));
     } catch (e) {

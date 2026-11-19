@@ -46,7 +46,7 @@ export default function CravingPage() {
 
   useEffect(() => {
     sb().from("food_logs").select("kcal").eq("log_date", todayStr()).then(({ data }) => {
-      if (data) setLeft(profile.calorie_target - Math.round(data.reduce((a, l) => a + Number(l.kcal), 0)));
+      if (data) setLeft(profile.calorie_target - Math.round((data as { kcal: number }[]).reduce((a: number, l) => a + Number(l.kcal), 0)));
     });
   }, [profile.calorie_target]);
 

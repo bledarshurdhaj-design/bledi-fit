@@ -33,7 +33,7 @@ export default function Dashboard() {
       ]);
       const wd = check(w);
       setLatest(wd.length ? Number(wd[0].kg) : null);
-      const ld = check(logs);
+      const ld = check(logs) as { kcal: number; protein: number }[];
       const k = ld.reduce((a, l) => a + Number(l.kcal), 0);
       const p = ld.reduce((a, l) => a + Number(l.protein), 0);
       setKcal(Math.round(k));

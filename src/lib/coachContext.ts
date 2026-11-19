@@ -32,7 +32,7 @@ export async function buildCoachContext(db: Db, userId: string) {
     if (r.error) throw new HttpError(500, "Gabim gjatë leximit të të dhënave: " + r.error.message);
   }
 
-  const W = (weights.data ?? []).map((w) => ({ kg: Number(w.kg), measured_at: w.measured_at as string }));
+  const W = ((weights.data ?? []) as { kg: number; measured_at: string }[]).map((w) => ({ kg: Number(w.kg), measured_at: w.measured_at as string }));
   const L = (logs.data ?? []) as { log_date: string; name: string; grams: number; kcal: number; protein: number; source: string; eaten_at: string }[];
   const byDay = nutritionByDay(L);
   const todayN = byDay[today] ?? { kcal: 0, protein: 0, entries: 0, estimated_kcal: 0 };
