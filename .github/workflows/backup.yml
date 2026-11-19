@@ -1,0 +1,30 @@
+# Backup ditor i databazës (pg_dump) – ruhet si artifact në GitHub për 30 ditë.
+# Settings → Secrets → Actions → shto SUPABASE_DB_URL
+# (Supabase → Project Settings → Database → Connection string → URI, me fjalëkalimin tënd)
+name: Backup i databazës
+
+on:
+  schedule:
+    - cron: "30 2 * * *"   # çdo ditë 02:30 UTC
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Instalo PostgreSQL client
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-client-17
+      - name: pg_dump
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          /usr/lib/postgresql/17/bin/pg_dump "$DB_URL" --schema=public --no-owner --no-privileges -Fc -f bledi-fit-$(date +%F).dump
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bledi-fit-backup
+          path: "*.dump"
+          retention-days: 30
